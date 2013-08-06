@@ -1,0 +1,4 @@
+database:
+  socket: /private/tmp/.s.PGSQL.5432
+  database: munchdb_development
+  user: jack

@@ -1,0 +1,15 @@
+alterations:
+  table: tern_alterations
+  column: version
+definitions:
+  table: tern_definitions
+environments:
+  development:
+    adapter: postgres
+    database: munchdb_development
+  test:
+    adapter: postgres
+    database: munchdb_test
+  production:
+    adapter: postgres
+    database: munchdb_production

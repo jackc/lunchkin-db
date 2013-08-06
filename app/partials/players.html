@@ -1,0 +1,14 @@
+<h1>Players</h1>
+
+<ul>
+  <li ng-repeat="p in players">
+    {{p.name}}
+    <button ng-click="deletePlayer(p)">Delete</button>
+  </li>
+</ul>
+
+<form novalidate>
+  Name: <input type="text" ng-model="player.name" /><br />
+  <button ng-click="create(player)">Save</button>
+</form>
+
