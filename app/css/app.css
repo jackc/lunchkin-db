@@ -28,3 +28,37 @@
   content: "";
   padding: 0;
 }
+
+#standingsPage table {
+  border-collapse: collapse;
+  font-size: 24px;
+}
+
+#standingsPage tbody {
+  border-bottom: 1px solid black;
+}
+
+#standingsPage tbody tr:nth-child(odd) {
+  background-color: #ddd;
+}
+
+#standingsPage th, #standingsPage td {
+  padding-left: 24px;
+  padding-right: 24px;
+  text-align: left;
+}
+
+#standingsPage table .number {
+  text-align: right;
+}
+
+#standingsPage th {
+  padding-top: 20px;
+}
+
+#standingsPage caption {
+/*  background-color: #bbb;
+  color: white;*/
+  font-size: 2em;
+  border-bottom: 1px solid black;
+}
