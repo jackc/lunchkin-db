@@ -37,6 +37,7 @@
   <table>
     <thead>
       <tr>
+        <th></th>
         <th>Player</th>
         <th>Level</th>
         <th>Effective Level</th>
@@ -44,10 +45,11 @@
       </tr>
     </thead>
     <tr ng-repeat="p in game.players">
-      <td>{{p.name}}</td>
-      <td><input type="number" min="1" max="20" ng-model="p.level" /></td>
-      <td><input type="number" min="-1000" max="1000" ng-model="p.effective_level" /></td>
-      <td><input type="checkbox" ng-model="p.winner" /></td>
+      <td><input type="checkbox" ng-model="p.played" id="played{{p.player_id}}" /></td>
+      <td><label for="played{{p.player_id}}">{{p.name}}</label></td>
+      <td><input type="number" min="1" max="20" ng-model="p.level" ng-disabled="!p.played" /></td>
+      <td><input type="number" min="-1000" max="1000" ng-model="p.effective_level" ng-disabled="!p.played" /></td>
+      <td><input type="checkbox" ng-model="p.winner" ng-disabled="!p.played" /></td>
     </tr>
   </table>
   <button ng-click="createGame(game)">Save</button>

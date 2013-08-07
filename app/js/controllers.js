@@ -42,17 +42,28 @@ angular.module('myApp.controllers', []).
     };
 
     $http.get('api/v1/players').success(function(data) {
-      $scope.players = data;
+      $scope.game.players = data;
     });
 
-    $scope.game = {players: []};
-
-    $scope.addPlayerToGame = function(player) {
-      $scope.game.players.push({player_id: player.player_id, name: player.name});
-    };
-
     $scope.createGame = function(game) {
-      $http.post('api/v1/games', game).success(function(data) {
+      var postData = {
+        date: game.date,
+        players: []
+      };
+
+      for(var i = 0; i < game.players.length; i++) {
+        var p = game.players[i];
+        if(p.played) {
+          postData.players.push({
+            player_id: p.player_id,
+            level: p.level,
+            effective_level: p.effective_level,
+            winner: p.winner
+          });
+        }
+      }
+
+      $http.post('api/v1/games', postData).success(function(data) {
         $http.get('api/v1/games').success(function(data) {
           $scope.games = data;
         });
