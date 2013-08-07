@@ -7,7 +7,7 @@ angular.module('myApp.controllers', []).
     $http.get('api/v1/standings').success(function(data) {
       $scope.players = data;
     });
-    $scope.sort = '-num_points';
+    $scope.sort = '-rating';
   }])
   .controller('Players', ['$scope', '$http', function($scope, $http) {
     $http.get('api/v1/players').success(function(data) {

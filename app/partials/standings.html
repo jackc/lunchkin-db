@@ -6,11 +6,13 @@
     <th ng-click="sort = 'num_games'; reverse=!reverse">Games</th>
     <th ng-click="sort = 'num_wins'; reverse=!reverse">Wins</th>
     <th ng-click="sort = 'num_points'; reverse=!reverse">Points</th>
+    <th ng-click="sort = 'rating'; reverse=!reverse">Rating</th>
   </thead>
   <tr ng-repeat="p in players | orderBy:sort:reverse">
     <td>{{p.name}}</td>
     <td>{{p.num_games}}</td>
     <td>{{p.num_wins}}</td>
     <td>{{p.num_points}}</td>
+    <td>{{p.rating | number:3}}</td>
   </tr>
 </table>
