@@ -22,34 +22,3 @@
     <button ng-click="deleteGame(g)">Delete</button>
   </li>
 </ul>
-
-<h1>Record a Game</h1>
-
-<ul>
-  <li ng-repeat="p in players" ng-click="addPlayerToGame(p)">
-    {{p.name}}
-  </li>
-</ul>
-
-<form novalidate>
-  Date: <input type="date" ng-model="game.date" /><br />
-  <table>
-    <thead>
-      <tr>
-        <th></th>
-        <th>Player</th>
-        <th>Level</th>
-        <th>Effective Level</th>
-        <th>Winner</th>
-      </tr>
-    </thead>
-    <tr ng-repeat="p in game.players">
-      <td><input type="checkbox" ng-model="p.played" id="played{{p.player_id}}" /></td>
-      <td><label for="played{{p.player_id}}">{{p.name}}</label></td>
-      <td><input type="number" min="1" max="20" ng-model="p.level" ng-disabled="!p.played" /></td>
-      <td><input type="number" min="-1000" max="1000" ng-model="p.effective_level" ng-disabled="!p.played" /></td>
-      <td><input type="checkbox" ng-model="p.winner" ng-disabled="!p.played" /></td>
-    </tr>
-  </table>
-  <button ng-click="createGame(game)">Save</button>
-</form>

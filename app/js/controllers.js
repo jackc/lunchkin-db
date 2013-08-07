@@ -77,4 +77,37 @@ angular.module('myApp.controllers', []).
         });
       })
     };
+  }])
+  .controller('NewGame', ['$scope', '$http', '$location', function($scope, $http, $location) {
+    $scope.game = {
+      date: moment().format('YYYY-MM-DD'),
+      players: []
+    };
+
+    $http.get('api/v1/players').success(function(data) {
+      $scope.game.players = data;
+    });
+
+    $scope.createGame = function(game) {
+      var postData = {
+        date: game.date,
+        players: []
+      };
+
+      for(var i = 0; i < game.players.length; i++) {
+        var p = game.players[i];
+        if(p.played) {
+          postData.players.push({
+            player_id: p.player_id,
+            level: p.level,
+            effective_level: p.effective_level,
+            winner: p.winner
+          });
+        }
+      }
+
+      $http.post('api/v1/games', postData).success(function(data) {
+        $location.path("/standings")
+      })
+    };
   }]);
