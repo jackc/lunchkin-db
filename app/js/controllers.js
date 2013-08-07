@@ -36,6 +36,11 @@ angular.module('myApp.controllers', []).
       $scope.games = data;
     });
 
+    $scope.game = {
+      date: moment().format('YYYY-MM-DD'),
+      players: []
+    };
+
     $http.get('api/v1/players').success(function(data) {
       $scope.players = data;
     });
