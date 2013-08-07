@@ -137,3 +137,10 @@ func deleteGame(w http.ResponseWriter, req *http.Request) {
 		http.Error(w, "Internal server error", http.StatusInternalServerError)
 	}
 }
+
+func getStandings(w http.ResponseWriter, req *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	if err := pool.SelectValueTo(w, "getStandings"); err != nil {
+		http.Error(w, "Internal server error", http.StatusInternalServerError)
+	}
+}

@@ -3,20 +3,11 @@
 /* Controllers */
 
 angular.module('myApp.controllers', []).
-  controller('MyCtrl1', ['$scope', function($scope) {
-    $scope.name = "Jack";
-    $scope.noteHeaders = [
-      {title: "Note 1", body: "Bla bla bla..."},
-      {title: "Note 2", body: "Yada yada yada..."},
-      {title: "Note 3", body: "Fe Fi Fo Fum..."},
-      {title: "Note 4", body: "Out of things to say..."}
-    ];
-    $scope.currentNote = $scope.noteHeaders[0];
-
-    $scope.selectNote = function(noteHeader) {
-      $scope.currentNote = noteHeader;
-    }
-
+  controller('Standings', ['$scope', '$http', function($scope, $http) {
+    $http.get('api/v1/standings').success(function(data) {
+      $scope.players = data;
+    });
+    $scope.sort = '-num_points';
   }])
   .controller('Players', ['$scope', '$http', function($scope, $http) {
     $http.get('api/v1/players').success(function(data) {

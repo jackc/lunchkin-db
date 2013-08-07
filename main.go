@@ -116,6 +116,18 @@ func afterConnect(conn *pgx.Connection) (err error) {
 		return
 	}
 
+	err = conn.Prepare("getStandings", `
+    select coalesce(array_to_json(array_agg(row_to_json(t))), '[]'::json)
+    from (
+      select *
+      from player_summary
+      order by num_points desc, name asc
+    ) t
+  `)
+	if err != nil {
+		return
+	}
+
 	return
 }
 
@@ -159,6 +171,7 @@ func main() {
 	router.Get("/games", http.HandlerFunc(getGames))
 	router.Post("/games", http.HandlerFunc(createGame))
 	router.Delete("/games/:id", http.HandlerFunc(deleteGame))
+	router.Get("/standings", http.HandlerFunc(getStandings))
 	http.Handle("/api/v1/", http.StripPrefix("/api/v1", router))
 	http.Handle("/", NoDirListing(http.FileServer(http.Dir("./app/"))))
 
