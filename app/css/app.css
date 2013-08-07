@@ -54,6 +54,7 @@
 
 #standingsPage th {
   padding-top: 20px;
+  cursor: pointer;
 }
 
 #standingsPage caption {
