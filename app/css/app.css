@@ -63,3 +63,22 @@
   font-size: 2em;
   border-bottom: 1px solid black;
 }
+
+#playersPage ul {
+  list-style-type: none;
+  padding: 0;
+}
+
+#playersPage li {
+  margin-top: 4px;
+  margin-bottom: 4px;
+}
+
+#playersPage div.name {
+  min-width: 90px;
+  display: inline-block;
+}
+
+#playersPage input[type=text] {
+  width: 80px;
+}
