@@ -1,5 +1,6 @@
 address: 127.0.0.1
 port: 4000
+assetpath: app
 database:
   socket: /private/tmp/.s.PGSQL.5432
   database: munchdb_development

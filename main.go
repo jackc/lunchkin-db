@@ -19,7 +19,8 @@ import (
 var pool *pgx.ConnectionPool
 
 var config struct {
-	path          string
+	assetPath     string
+	configPath    string
 	listenAddress string
 	listenPort    string
 }
@@ -30,7 +31,8 @@ func init() {
 
 	flag.StringVar(&config.listenAddress, "address", "127.0.0.1", "address to listen on")
 	flag.StringVar(&config.listenPort, "port", "8080", "port to listen on")
-	flag.StringVar(&config.path, "config", "config.yml", "path to config file")
+	flag.StringVar(&config.assetPath, "assetpath", "assets", "path to assets")
+	flag.StringVar(&config.configPath, "config", "config.yml", "path to config file")
 	flag.Parse()
 
 	givenCliArgs := make(map[string]bool)
@@ -38,12 +40,17 @@ func init() {
 		givenCliArgs[f.Name] = true
 	})
 
-	if config.path, err = filepath.Abs(config.path); err != nil {
+	if config.configPath, err = filepath.Abs(config.configPath); err != nil {
 		fmt.Fprintf(os.Stderr, "Invalid config path: %v\n", err)
 		os.Exit(1)
 	}
 
-	if yf, err = yaml.ReadFile(config.path); err != nil {
+	if config.assetPath, err = filepath.Abs(config.assetPath); err != nil {
+		fmt.Fprintf(os.Stderr, "Invalid asset path: %v\n", err)
+		os.Exit(1)
+	}
+
+	if yf, err = yaml.ReadFile(config.configPath); err != nil {
 		fmt.Fprintln(os.Stderr, err.Error())
 		os.Exit(1)
 	}
@@ -51,6 +58,12 @@ func init() {
 	if !givenCliArgs["address"] {
 		if address, err := yf.Get("address"); err == nil {
 			config.listenAddress = address
+		}
+	}
+
+	if !givenCliArgs["assetpath"] {
+		if assetpath, err := yf.Get("assetpath"); err == nil {
+			config.assetPath = assetpath
 		}
 	}
 
@@ -185,7 +198,7 @@ func main() {
 	router.Delete("/games/:id", http.HandlerFunc(deleteGame))
 	router.Get("/standings", http.HandlerFunc(getStandings))
 	http.Handle("/api/v1/", http.StripPrefix("/api/v1", router))
-	http.Handle("/", NoDirListing(http.FileServer(http.Dir("./app/"))))
+	http.Handle("/", NoDirListing(http.FileServer(http.Dir(config.assetPath))))
 
 	listenAt := fmt.Sprintf("%s:%s", config.listenAddress, config.listenPort)
 	fmt.Printf("Starting to listen on: %s\n", listenAt)
