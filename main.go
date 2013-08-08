@@ -18,30 +18,60 @@ import (
 
 var pool *pgx.ConnectionPool
 
-type cliArgs struct {
-	configPath    string
+var config struct {
+	path          string
 	listenAddress string
-	listenPort    uint64
+	listenPort    string
 }
 
-func parseCliArgs() (args *cliArgs) {
-	args = new(cliArgs)
+func init() {
+	var err error
+	var yf *yaml.File
 
-	flag.StringVar(&args.listenAddress, "address", "127.0.0.1", "address to listen on")
-	flag.Uint64Var(&args.listenPort, "port", 8080, "port to listen on")
-	flag.StringVar(&args.configPath, "config", "config.yml", "path to config file")
+	flag.StringVar(&config.listenAddress, "address", "127.0.0.1", "address to listen on")
+	flag.StringVar(&config.listenPort, "port", "8080", "port to listen on")
+	flag.StringVar(&config.path, "config", "config.yml", "path to config file")
 	flag.Parse()
 
-	return
-}
+	givenCliArgs := make(map[string]bool)
+	flag.Visit(func(f *flag.Flag) {
+		givenCliArgs[f.Name] = true
+	})
 
-func loadConfig(path string) (yf *yaml.File, err error) {
-	if path, err = filepath.Abs(path); err != nil {
-		return
+	if config.path, err = filepath.Abs(config.path); err != nil {
+		fmt.Fprintf(os.Stderr, "Invalid config path: %v\n", err)
+		os.Exit(1)
 	}
 
-	yf, err = yaml.ReadFile(path)
-	return
+	if yf, err = yaml.ReadFile(config.path); err != nil {
+		fmt.Fprintln(os.Stderr, err.Error())
+		os.Exit(1)
+	}
+
+	if !givenCliArgs["address"] {
+		if address, err := yf.Get("address"); err == nil {
+			config.listenAddress = address
+		}
+	}
+
+	if !givenCliArgs["port"] {
+		if port, err := yf.Get("port"); err == nil {
+			config.listenPort = port
+		}
+	}
+
+	var connectionParameters pgx.ConnectionParameters
+	if connectionParameters, err = extractConnectionOptions(yf); err != nil {
+		fmt.Fprintln(os.Stderr, err.Error())
+		os.Exit(1)
+	}
+
+	poolOptions := pgx.ConnectionPoolOptions{MaxConnections: 5, AfterConnect: afterConnect}
+	pool, err = pgx.NewConnectionPool(connectionParameters, poolOptions)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Unable to create database connection pool: %v\n", err)
+		os.Exit(1)
+	}
 }
 
 func extractConnectionOptions(config *yaml.File) (connectionOptions pgx.ConnectionParameters, err error) {
@@ -146,28 +176,6 @@ func NoDirListing(handler http.Handler) http.HandlerFunc {
 }
 
 func main() {
-	args := parseCliArgs()
-
-	var err error
-	var yaml *yaml.File
-	if yaml, err = loadConfig(args.configPath); err != nil {
-		fmt.Fprintln(os.Stderr, err.Error())
-		os.Exit(1)
-	}
-
-	var connectionParameters pgx.ConnectionParameters
-	if connectionParameters, err = extractConnectionOptions(yaml); err != nil {
-		fmt.Fprintln(os.Stderr, err.Error())
-		os.Exit(1)
-	}
-
-	poolOptions := pgx.ConnectionPoolOptions{MaxConnections: 5, AfterConnect: afterConnect}
-	pool, err = pgx.NewConnectionPool(connectionParameters, poolOptions)
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "Unable to create database connection pool: %v\n", err)
-		os.Exit(1)
-	}
-
 	router := qv.NewRouter()
 	router.Get("/players", http.HandlerFunc(getPlayers))
 	router.Post("/players", http.HandlerFunc(createPlayer))
@@ -179,11 +187,10 @@ func main() {
 	http.Handle("/api/v1/", http.StripPrefix("/api/v1", router))
 	http.Handle("/", NoDirListing(http.FileServer(http.Dir("./app/"))))
 
-	listenAt := fmt.Sprintf("%s:%d", args.listenAddress, args.listenPort)
+	listenAt := fmt.Sprintf("%s:%s", config.listenAddress, config.listenPort)
 	fmt.Printf("Starting to listen on: %s\n", listenAt)
 
-	err = http.ListenAndServe(listenAt, nil)
-	if err != nil {
+	if err := http.ListenAndServe(listenAt, nil); err != nil {
 		os.Stderr.WriteString("Could not start web server!\n")
 		os.Exit(1)
 	}
