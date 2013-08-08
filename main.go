@@ -19,12 +19,16 @@ import (
 var pool *pgx.ConnectionPool
 
 type cliArgs struct {
-	configPath string
+	configPath    string
+	listenAddress string
+	listenPort    uint64
 }
 
 func parseCliArgs() (args *cliArgs) {
 	args = new(cliArgs)
 
+	flag.StringVar(&args.listenAddress, "address", "127.0.0.1", "address to listen on")
+	flag.Uint64Var(&args.listenPort, "port", 8080, "port to listen on")
 	flag.StringVar(&args.configPath, "config", "config.yml", "path to config file")
 	flag.Parse()
 
@@ -175,7 +179,10 @@ func main() {
 	http.Handle("/api/v1/", http.StripPrefix("/api/v1", router))
 	http.Handle("/", NoDirListing(http.FileServer(http.Dir("./app/"))))
 
-	err = http.ListenAndServe("localhost:8080", nil)
+	listenAt := fmt.Sprintf("%s:%d", args.listenAddress, args.listenPort)
+	fmt.Printf("Starting to listen on: %s\n", listenAt)
+
+	err = http.ListenAndServe(listenAt, nil)
 	if err != nil {
 		os.Stderr.WriteString("Could not start web server!\n")
 		os.Exit(1)
