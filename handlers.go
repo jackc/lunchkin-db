@@ -77,6 +77,7 @@ func createGame(w http.ResponseWriter, req *http.Request) {
 	}
 	var game struct {
 		Date    string
+		Length  int16
 		Players []Player
 	}
 
@@ -91,13 +92,14 @@ func createGame(w http.ResponseWriter, req *http.Request) {
 	var sql bytes.Buffer
 	sql.WriteString(`
     with g as (
-      insert into game(date) values($1) returning game_id
+      insert into game(date, length) values($1, $2) returning game_id
     ), p as (
     insert into game_player(game_id, player_id, level, effective_level, winner)
     select game_id, player_id, level, effective_level, winner
     from g
       cross join (values`)
 	args = append(args, game.Date)
+	args = append(args, game.Length)
 	for i, p := range game.Players {
 		fmt.Fprintf(&sql, "($%d, $%d, $%d, $%d)", len(args)+1, len(args)+2, len(args)+3, len(args)+4)
 		args = append(args, p.Player_Id)

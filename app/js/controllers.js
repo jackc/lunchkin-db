@@ -91,6 +91,7 @@ angular.module('myApp.controllers', []).
     $scope.createGame = function(game) {
       var postData = {
         date: game.date,
+        length: game.length,
         players: []
       };
 

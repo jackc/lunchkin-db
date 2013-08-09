@@ -139,7 +139,7 @@ func afterConnect(conn *pgx.Connection) (err error) {
 	err = conn.Prepare("getGames", `
     select coalesce(array_to_json(array_agg(row_to_json(g))), '[]'::json)
     from (
-      select game_id, date,
+      select game_id, date, length,
         (
           select coalesce(array_to_json(array_agg(row_to_json(t))), '[]'::json)
           from (
