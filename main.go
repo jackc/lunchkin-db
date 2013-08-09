@@ -79,6 +79,11 @@ func init() {
 		os.Exit(1)
 	}
 
+	if err = migrate(connectionParameters); err != nil {
+		fmt.Fprintln(os.Stderr, err.Error())
+		os.Exit(1)
+	}
+
 	poolOptions := pgx.ConnectionPoolOptions{MaxConnections: 5, AfterConnect: afterConnect}
 	pool, err = pgx.NewConnectionPool(connectionParameters, poolOptions)
 	if err != nil {
