@@ -2,18 +2,15 @@ package main
 
 import (
 	"errors"
-	"net/http"
-	"strings"
-	// "bytes"
 	"flag"
 	"fmt"
 	"github.com/JackC/pgx"
 	qv "github.com/JackC/quo_vadis"
 	"github.com/kylelemons/go-gypsy/yaml"
-	// "io/ioutil"
-	// "net/http"
+	"net/http"
 	"os"
 	"path/filepath"
+	"strings"
 )
 
 var pool *pgx.ConnectionPool
