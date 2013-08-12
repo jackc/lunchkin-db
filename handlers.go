@@ -70,10 +70,10 @@ func gamePath(game_id int32) string {
 
 func createGame(w http.ResponseWriter, req *http.Request) {
 	type Player struct {
-		Player_Id      int32
-		Level          int16
-		EffectiveLevel int16
-		Winner         bool
+		Player_Id       int32
+		Level           int16
+		Effective_Level int16
+		Winner          bool
 	}
 	var game struct {
 		Date    string
@@ -104,7 +104,7 @@ func createGame(w http.ResponseWriter, req *http.Request) {
 		fmt.Fprintf(&sql, "($%d, $%d, $%d, $%d)", len(args)+1, len(args)+2, len(args)+3, len(args)+4)
 		args = append(args, p.Player_Id)
 		args = append(args, p.Level)
-		args = append(args, p.EffectiveLevel)
+		args = append(args, p.Effective_Level)
 		args = append(args, p.Winner)
 		if i < (len(game.Players) - 1) {
 			sql.WriteString(", ")
