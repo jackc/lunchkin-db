@@ -1,12 +1,6 @@
 require 'spec_helper'
 
 feature 'Player maintentance' do
-  background do
-    DB[:game].delete
-    DB[:player].delete
-    visit '/'
-  end
-
   scenario 'Adding a player' do
     click_on 'Players'
 
