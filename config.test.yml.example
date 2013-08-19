@@ -1,0 +1,7 @@
+address: 127.0.0.1
+port: 3999
+assetpath: app
+database:
+  socket: /private/tmp/.s.PGSQL.5432
+  database: lunchkin_test
+  user: jack
