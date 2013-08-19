@@ -1,8 +1,11 @@
 <h1>Record a Game</h1>
 
 <form novalidate>
-  Date: <input type="date" ng-model="game.date" /><br />
-  Length: <input type="number" min="1" max="32767" ng-model="game.length" /><br />
+  <label for="game_date">Date</label>
+  <input type="date" ng-model="game.date" id="game_date" /><br />
+
+  <label for="game_length">Length</label>
+  <input type="number" min="1" max="32767" ng-model="game.length" id="game_length" /><br />
   <table>
     <thead>
       <tr>
