@@ -15,6 +15,11 @@ end
 desc 'Build lunchkin-db'
 task build: 'lunchkin-db'
 
+desc 'Run lunchkin-db server'
+task server: 'lunchkin-db' do
+  sh './lunchkin-db'
+end
+
 task spec_server: :build do
   FileUtils.mkdir_p 'tmp/spec/server'
   FileUtils.touch 'tmp/spec/server/stdout.log'
