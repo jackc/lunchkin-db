@@ -17,7 +17,7 @@ task build: 'lunchkin-db'
 
 desc 'Run lunchkin-db server'
 task server: 'lunchkin-db' do
-  sh './lunchkin-db'
+  exec './lunchkin-db'
 end
 
 task spec_server: :build do
