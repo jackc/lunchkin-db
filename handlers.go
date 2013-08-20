@@ -52,7 +52,7 @@ func deletePlayer(w http.ResponseWriter, req *http.Request) {
 	}
 
 	if _, err := pool.Execute("deletePlayer", int32(playerId)); err != nil {
-		fmt.Fprintf(os.Stderr, "deletePlayer: %v", err)
+		fmt.Fprintf(os.Stderr, "deletePlayer: %v\n", err)
 		http.Error(w, "Internal server error", http.StatusInternalServerError)
 	}
 }
@@ -121,7 +121,7 @@ func createGame(w http.ResponseWriter, req *http.Request) {
 		w.Header().Add("Location", gamePath(game_id.(int32)))
 		w.WriteHeader(http.StatusCreated)
 	} else {
-		fmt.Fprintf(os.Stderr, "createGame: %v", err)
+		fmt.Fprintf(os.Stderr, "createGame: %v\n", err)
 		http.Error(w, "Internal server error", http.StatusInternalServerError)
 	}
 }
@@ -135,7 +135,7 @@ func deleteGame(w http.ResponseWriter, req *http.Request) {
 	}
 
 	if _, err := pool.Execute("deleteGame", int32(gameId)); err != nil {
-		fmt.Fprintf(os.Stderr, "deleteGame: %v", err)
+		fmt.Fprintf(os.Stderr, "deleteGame: %v\n", err)
 		http.Error(w, "Internal server error", http.StatusInternalServerError)
 	}
 }
