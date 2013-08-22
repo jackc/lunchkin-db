@@ -25,6 +25,26 @@
     <td class="number"><%= rating.toFixed(3) %></td>
   </script>
 
+  <script id="playerTemplate" type="text/html">
+    <li>
+      <div class="name"><%= name %></div>
+      <button>Delete</button>
+    </li>
+  </script>
+
+  <script id="playersTemplate" type="text/html">
+    <h1>Players</h1>
+
+    <ul>
+      <li>
+        <form novalidate>
+          <div class="name"><input type="text" id="player_name" /></div>
+          <button href="#" ng-click="create(player)">Add</button>
+        </form>
+      </li>
+    </ul>
+  </script>
+
   <script src="lib/jquery-2.0.3.js"></script>
   <script src="lib/underscore.js"></script>
   <script src="lib/backbone.js"></script>

@@ -21,6 +21,10 @@ class App.Collections.Standings extends Backbone.Collection
     else
       0
 
+class App.Collections.Players extends Backbone.Collection
+  url: 'api/v1/players'
+  comparator: 'name'
+
 class App.Views.PlayerStanding extends Marionette.ItemView
   tagName: 'tr'
   template: '#playerStandingsTemplate'
@@ -48,17 +52,58 @@ class App.Views.Standings extends Marionette.CompositeView
 
     @collection.sort()
 
+class App.Views.Player extends Marionette.ItemView
+  tagName: 'li'
+  template: '#playerTemplate'
+
+class App.Views.Players extends Marionette.CompositeView
+  id: 'playersPage'
+  template: '#playersTemplate'
+  itemView: App.Views.Player
+
+  appendHtml: (collectionView, itemView)->
+    collectionView.$("li:last").before  (itemView.el)
+
+  events:
+    'submit form' : 'addPlayer'
+
+  addPlayer: ->
+    @collection.create name: @$('#player_name').val()
+
+
+class window.Controller extends Marionette.Controller
+  standings: ->
+    collection = new App.Collections.Standings
+    collection.fetch()
+    standings = new App.Views.Standings collection: collection
+    Lunchkin.mainRegion.show(standings)
+  players: ->
+    collection = new App.Collections.Players
+    collection.fetch()
+    players = new App.Views.Players collection: collection
+    Lunchkin.mainRegion.show(players)
+  games: ->
+    console.log 'games'
+  gamesNew: ->
+    console.log 'record a game'
+
+controller = new Controller
+
+window.Router = new Marionette.AppRouter
+  controller: controller
+  appRoutes:
+    "": "standings"
+    "standings": "standings"
+    "players": "players"
+    "games": "games"
+    "games/new": "gamesNew"
+
 window.Lunchkin = new Marionette.Application
 
 Lunchkin.addInitializer ->
   Lunchkin.addRegions
     mainRegion: '#mainRegion'
 
-Lunchkin.addInitializer ->
-  collection = new App.Collections.Standings
-  collection.fetch()
-  standings = new App.Views.Standings collection: collection
-  Lunchkin.mainRegion.show(standings)
-
 $ ->
   Lunchkin.start()
+  Backbone.history.start()
