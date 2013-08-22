@@ -3,6 +3,9 @@ window.App =
   Models: {}
   Views: {}
 
+class App.Models.Player extends Backbone.Model
+  idAttribute: 'player_id'
+
 class App.Collections.Standings extends Backbone.Collection
   url: "api/v1/standings"
   sortAttribute: 'rating'
@@ -22,8 +25,10 @@ class App.Collections.Standings extends Backbone.Collection
       0
 
 class App.Collections.Players extends Backbone.Collection
+  model: App.Models.Player
   url: 'api/v1/players'
-  comparator: 'name'
+  comparator: (player)->
+    player.get('name').toLowerCase()
 
 class App.Views.PlayerStanding extends Marionette.ItemView
   tagName: 'tr'
@@ -56,6 +61,12 @@ class App.Views.Player extends Marionette.ItemView
   tagName: 'li'
   template: '#playerTemplate'
 
+  events:
+    'click button' : 'deleteSelf'
+
+  deleteSelf: ->
+    @model.destroy dataType: 'text', wait: true
+
 class App.Views.Players extends Marionette.CompositeView
   id: 'playersPage'
   template: '#playersTemplate'
@@ -67,8 +78,11 @@ class App.Views.Players extends Marionette.CompositeView
   events:
     'submit form' : 'addPlayer'
 
+  collectionEvents:
+    'sort': 'render'
+
   addPlayer: ->
-    @collection.create name: @$('#player_name').val()
+    @collection.create({name: @$('#player_name').val()}, {wait: true})
 
 
 class window.Controller extends Marionette.Controller

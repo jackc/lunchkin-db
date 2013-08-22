@@ -125,7 +125,8 @@ func afterConnect(conn *pgx.Connection) (err error) {
 	}
 
 	err = conn.Prepare("createPlayer", `
-    insert into player(name) values($1) returning player_id
+    insert into player(name) values($1)
+    returning row_to_json(player) as json, player_id
   `)
 	if err != nil {
 		return

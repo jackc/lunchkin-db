@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"io"
 	"net/http"
 	"os"
 	"strconv"
@@ -35,9 +36,10 @@ func createPlayer(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	if player_id, err := pool.SelectValue("createPlayer", player.Name); err == nil {
-		w.Header().Add("Location", playerPath(player_id.(int32)))
+	if row, err := pool.SelectRow("createPlayer", player.Name); err == nil {
+		w.Header().Add("Location", playerPath(row["player_id"].(int32)))
 		w.WriteHeader(http.StatusCreated)
+		io.WriteString(w, row["json"].(string))
 	} else {
 		http.Error(w, "Internal server error", http.StatusInternalServerError)
 	}
