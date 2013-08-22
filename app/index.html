@@ -18,11 +18,11 @@
   </script>
 
   <script id="playerStandingsTemplate" type="text/html">
-    <td><%= name %></td>
-    <td class="number"><%= num_games %></td>
-    <td class="number"><%= num_wins %></td>
-    <td class="number"><%= num_points %></td>
-    <td class="number"><%= rating.toFixed(3) %></td>
+    <td><%= ps.name %></td>
+    <td class="number"><%= ps.num_games %></td>
+    <td class="number"><%= ps.num_wins %></td>
+    <td class="number"><%= ps.num_points %></td>
+    <td class="number"><%= ps.rating.toFixed(3) %></td>
   </script>
 
   <script id="playerTemplate" type="text/html">
@@ -39,11 +39,23 @@
       <li>
         <form novalidate>
           <div class="name"><input type="text" id="player_name" /></div>
-          <button href="#" ng-click="create(player)">Add</button>
+          <button href="#">Add</button>
         </form>
       </li>
     </ul>
   </script>
+
+  <script id="gamesTemplate" type="text/html">
+    <h1>Games</h1>
+
+    <ul>
+    </ul>
+  </script>
+
+  <script id="gameTemplate" type="text/html">
+    <%= g.date %>
+  </script>
+
 
   <script src="lib/jquery-2.0.3.js"></script>
   <script src="lib/underscore.js"></script>

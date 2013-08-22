@@ -6,6 +6,12 @@ window.App =
 class App.Models.Player extends Backbone.Model
   idAttribute: 'player_id'
 
+class App.Models.Game extends Backbone.Model
+  idAttribute: 'game_id'
+
+  initialize: ->
+    debugger
+
 class App.Collections.Standings extends Backbone.Collection
   url: "api/v1/standings"
   sortAttribute: 'rating'
@@ -30,9 +36,32 @@ class App.Collections.Players extends Backbone.Collection
   comparator: (player)->
     player.get('name').toLowerCase()
 
+class App.Collections.Games extends Backbone.Collection
+  model: App.Models.Game
+  url: 'api/v1/games'
+  comparator: 'date'
+
 class App.Views.PlayerStanding extends Marionette.ItemView
   tagName: 'tr'
-  template: '#playerStandingsTemplate'
+  # template: '#playerStandingsTemplate'
+  template : (serialized_model)->
+    _.template($('#playerStandingsTemplate').html(), serialized_model, {variable: 'ps'})
+
+
+class App.Views.Game extends Marionette.ItemView
+  tagName: 'li'
+  template : (serialized_model)->
+    _.template($('#gameTemplate').html(), serialized_model, {variable: 'g'})
+
+class App.Views.Games extends Marionette.CompositeView
+  tagName: 'div'
+  itemView: App.Views.Game
+  template : (serialized_model)->
+    _.template($('#gamesTemplate').html(), serialized_model, {variable: 'games'})
+
+  appendHtml: (collectionView, itemView)->
+    collectionView.$("ul").append(itemView.el)
+
 
 class App.Views.Standings extends Marionette.CompositeView
   tagName: 'table'
@@ -97,7 +126,10 @@ class window.Controller extends Marionette.Controller
     players = new App.Views.Players collection: collection
     Lunchkin.mainRegion.show(players)
   games: ->
-    console.log 'games'
+    collection = new App.Collections.Games
+    collection.fetch()
+    games = new App.Views.Games collection: collection
+    Lunchkin.mainRegion.show(games)
   gamesNew: ->
     console.log 'record a game'
 
