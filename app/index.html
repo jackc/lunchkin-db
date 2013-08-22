@@ -1,9 +1,38 @@
 <!doctype html>
-<html lang="en" ng-app="myApp">
+<html>
 <head>
-  <meta charset="utf-8">
   <title>Lunchkin Scoreboard</title>
   <link rel="stylesheet" href="css/app.css"/>
+
+  <script id="standingsTemplate" type="text/html">
+    <caption>Standings</caption>
+    <thead>
+      <tr>
+        <th data-sort="name">Player</th>
+        <th data-sort="num_games">Games</th>
+        <th data-sort="num_wins">Wins</th>
+        <th data-sort="num_points">Points</th>
+        <th data-sort="rating">Rating</th>
+      </tr>
+    </thead>
+  </script>
+
+  <script id="playerStandingsTemplate" type="text/html">
+    <td><%= name %></td>
+    <td class="number"><%= num_games %></td>
+    <td class="number"><%= num_wins %></td>
+    <td class="number"><%= num_points %></td>
+    <td class="number"><%= rating.toFixed(3) %></td>
+  </script>
+
+  <script src="lib/jquery-2.0.3.min.js"></script>
+  <script src="lib/underscore-min.js"></script>
+  <script src="lib/backbone-min.js"></script>
+  <script src="lib/backbone.babysitter.min.js"></script>
+  <script src="lib/backbone.wreqr.min.js"></script>
+  <script src="lib/backbone.marionette.min.js"></script>
+  <script src="lib/moment.min.js"></script>
+  <script src="js/app.js"></script>
 </head>
 <body>
   <ul class="menu">
@@ -12,18 +41,7 @@
     <li><a href="#/games">Games</a></li>
     <li><a href="#/games/new">Record a Game</a></li>
   </ul>
-
-  <div ng-view></div>
-
-  <!-- In production use:
-  <script src="//ajax.googleapis.com/ajax/libs/angularjs/1.0.7/angular.min.js"></script>
-  -->
-  <script src="lib/angular/angular.js"></script>
-  <script src="lib/moment.js"></script>
-  <script src="js/app.js"></script>
-  <script src="js/services.js"></script>
-  <script src="js/controllers.js"></script>
-  <script src="js/filters.js"></script>
-  <script src="js/directives.js"></script>
+  <div id="mainRegion"></div>
 </body>
 </html>
+
