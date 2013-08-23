@@ -167,18 +167,6 @@ func afterConnect(conn *pgx.Connection) (err error) {
 		return
 	}
 
-	err = conn.Prepare("getStandings", `
-    select coalesce(array_to_json(array_agg(row_to_json(t))), '[]'::json)
-    from (
-      select *
-      from player_summary
-      order by num_points desc, name asc
-    ) t
-  `)
-	if err != nil {
-		return
-	}
-
 	return
 }
 
@@ -194,6 +182,7 @@ func NoDirListing(handler http.Handler) http.HandlerFunc {
 
 func main() {
 	router := qv.NewRouter()
+	router.Get("/standings", http.HandlerFunc(getStandings))
 	router.Get("/players", http.HandlerFunc(getPlayers))
 	router.Post("/players", http.HandlerFunc(createPlayer))
 	router.Post("players/:id/delete", http.HandlerFunc(deletePlayer))

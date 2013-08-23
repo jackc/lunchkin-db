@@ -152,9 +152,44 @@ func deleteGame(w http.ResponseWriter, req *http.Request) {
 	}
 }
 
-func getStandings(w http.ResponseWriter, req *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
-	if err := pool.SelectValueTo(w, "getStandings"); err != nil {
-		http.Error(w, "Internal server error", http.StatusInternalServerError)
+func sortLink(label, column, defaultSortDir, sortCol, sortDir string) string {
+	var newSortDir string
+	if column == sortCol {
+		if sortDir == "asc" {
+			newSortDir = "desc"
+		} else {
+			newSortDir = "asc"
+		}
+	} else {
+		newSortDir = defaultSortDir
 	}
+	return fmt.Sprintf(`<a href="?sortCol=%s&sortDir=%s">%s</a>`, column, newSortDir, label)
+}
+
+func getStandings(w http.ResponseWriter, req *http.Request) {
+	sortCol := req.FormValue("sortCol")
+	switch sortCol {
+	case "name", "num_games", "num_wins", "num_points", "rating":
+	default:
+		sortCol = "rating"
+	}
+
+	sortDir := req.FormValue("sortDir")
+	switch sortDir {
+	case "asc", "desc":
+	default:
+		sortDir = "desc"
+	}
+
+	rows, err := pool.SelectRows(fmt.Sprintf(`
+    select player_id, name, num_games, num_wins, num_points, round(rating, 3)::varchar as rating
+    from player_summary
+    order by %s %s, name asc
+  `, sortCol, sortDir))
+	if err != nil {
+		http.Error(w, "Internal server error", http.StatusInternalServerError)
+		return
+	}
+
+	RenderStandings(w, rows, sortCol, sortDir)
 }
