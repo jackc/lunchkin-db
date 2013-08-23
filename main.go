@@ -110,15 +110,17 @@ func extractConnectionOptions(config *yaml.File) (connectionOptions pgx.Connecti
 	return
 }
 
+type player struct {
+	player_id int32
+	name      string
+}
+
 // afterConnect creates the prepared statements that this application uses
 func afterConnect(conn *pgx.Connection) (err error) {
 	err = conn.Prepare("getPlayers", `
-    select coalesce(array_to_json(array_agg(row_to_json(t))), '[]'::json)
-    from (
-      select player_id, name
-      from player
-      order by name
-    ) t
+    select player_id, name
+    from player
+    order by name
   `)
 	if err != nil {
 		return
@@ -194,13 +196,9 @@ func main() {
 	router := qv.NewRouter()
 	router.Get("/players", http.HandlerFunc(getPlayers))
 	router.Post("/players", http.HandlerFunc(createPlayer))
-	router.Delete("/players/:id", http.HandlerFunc(deletePlayer))
-	router.Get("/games", http.HandlerFunc(getGames))
-	router.Post("/games", http.HandlerFunc(createGame))
-	router.Delete("/games/:id", http.HandlerFunc(deleteGame))
-	router.Get("/standings", http.HandlerFunc(getStandings))
-	http.Handle("/api/v1/", http.StripPrefix("/api/v1", router))
-	http.Handle("/", NoDirListing(http.FileServer(http.Dir(config.assetPath))))
+	router.Post("players/:id/delete", http.HandlerFunc(deletePlayer))
+	http.Handle("/", router)
+	http.Handle("/assets/", NoDirListing(http.StripPrefix("/assets/", http.FileServer(http.Dir(config.assetPath)))))
 
 	listenAt := fmt.Sprintf("%s:%s", config.listenAddress, config.listenPort)
 	fmt.Printf("Starting to listen on: %s\n", listenAt)

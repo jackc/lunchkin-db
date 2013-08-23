@@ -4,40 +4,49 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"github.com/JackC/pgx"
 	"net/http"
 	"os"
 	"strconv"
 )
 
 func getPlayers(w http.ResponseWriter, req *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
-	if err := pool.SelectValueTo(w, "getPlayers"); err != nil {
+	players := make([]*player, 0, 16)
+
+	err := pool.SelectFunc("getPlayers", func(r *pgx.DataRowReader) error {
+		var p player
+		p.player_id = r.ReadValue().(int32)
+		p.name = r.ReadValue().(string)
+		players = append(players, &p)
+		return nil
+	})
+	if err != nil {
 		http.Error(w, "Internal server error", http.StatusInternalServerError)
-	}
-}
-
-func playerPath(player_id int32) string {
-	return fmt.Sprintf("/api/v1/players/%d", player_id)
-}
-
-func createPlayer(w http.ResponseWriter, req *http.Request) {
-	var player struct{ Name string }
-	decoder := json.NewDecoder(req.Body)
-	if err := decoder.Decode(&player); err != nil {
-		w.WriteHeader(422)
-		fmt.Fprintf(w, "Error decoding request: %v", err)
 		return
 	}
 
-	if player.Name == "" {
+	RenderPlayersIndex(w, players)
+}
+
+func playerPath(player_id int32) string {
+	return fmt.Sprintf("/players/%d", player_id)
+}
+
+func deletePlayerPath(player_id int32) string {
+	return fmt.Sprintf("/players/%d/delete", player_id)
+}
+
+func createPlayer(w http.ResponseWriter, req *http.Request) {
+	name := req.FormValue("player_name")
+
+	if name == "" {
 		w.WriteHeader(422)
 		fmt.Fprintln(w, `Request must include the attribute "name"`)
 		return
 	}
 
-	if player_id, err := pool.SelectValue("createPlayer", player.Name); err == nil {
-		w.Header().Add("Location", playerPath(player_id.(int32)))
-		w.WriteHeader(http.StatusCreated)
+	if _, err := pool.SelectValue("createPlayer", name); err == nil {
+		http.Redirect(w, req, "/players", http.StatusSeeOther)
 	} else {
 		http.Error(w, "Internal server error", http.StatusInternalServerError)
 	}
@@ -54,7 +63,10 @@ func deletePlayer(w http.ResponseWriter, req *http.Request) {
 	if _, err := pool.Execute("deletePlayer", int32(playerId)); err != nil {
 		fmt.Fprintf(os.Stderr, "deletePlayer: %v\n", err)
 		http.Error(w, "Internal server error", http.StatusInternalServerError)
+		return
 	}
+
+	http.Redirect(w, req, "/players", http.StatusSeeOther)
 }
 
 func getGames(w http.ResponseWriter, req *http.Request) {

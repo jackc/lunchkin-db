@@ -8,7 +8,25 @@ end
 require 'fileutils'
 require 'rspec/core/rake_task'
 
-file 'lunchkin-db' => ['handlers.go', 'main.go', 'migrations.go'] do |t|
+file 'players_index.go' => 'players_index.gst' do |t|
+  t.prerequisites.each do |source|
+    sh "gst #{source} | gofmt > #{t.name}"
+  end
+end
+
+file 'header.go' => 'header.gst' do |t|
+  t.prerequisites.each do |source|
+    sh "gst #{source} | gofmt > #{t.name}"
+  end
+end
+
+file 'footer.go' => 'footer.gst' do |t|
+  t.prerequisites.each do |source|
+    sh "gst #{source} | gofmt > #{t.name}"
+  end
+end
+
+file 'lunchkin-db' => ['handlers.go', 'main.go', 'migrations.go', 'players_index.go', 'header.go', 'footer.go'] do |t|
   sh 'go build'
 end
 

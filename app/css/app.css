@@ -79,6 +79,10 @@
   display: inline-block;
 }
 
+#playersPage li form {
+  display: inline-block;
+}
+
 #playersPage input[type=text] {
   width: 80px;
 }
