@@ -31,7 +31,9 @@ parameters: games []Game
           </tr>
         <% } %>
       </table>
-
+      <form action="<%= deleteGamePath(g.GameId) %>" method="POST">
+        <button>Delete</button>
+      </form>
     </li>
   <% } %>
 </ul>

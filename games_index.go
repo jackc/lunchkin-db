@@ -53,7 +53,11 @@ func RenderGamesIndex(writer io.Writer, games []Game) (err error) {
 		}
 		io.WriteString(writer, `
       </table>
-
+      <form action="`)
+		io.WriteString(writer, html.EscapeString(deleteGamePath(g.GameId)))
+		io.WriteString(writer, `" method="POST">
+        <button>Delete</button>
+      </form>
     </li>
   `)
 	}

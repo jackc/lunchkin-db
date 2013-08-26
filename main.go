@@ -243,6 +243,7 @@ func main() {
 	router.Post("/players", http.HandlerFunc(createPlayer))
 	router.Post("players/:id/delete", http.HandlerFunc(deletePlayer))
 	router.Get("/games", http.HandlerFunc(getGames))
+	router.Post("games/:id/delete", http.HandlerFunc(deleteGame))
 	http.Handle("/", router)
 	http.Handle("/assets/", NoDirListing(http.StripPrefix("/assets/", http.FileServer(http.Dir(config.assetPath)))))
 

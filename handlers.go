@@ -83,6 +83,10 @@ func gamePath(game_id int32) string {
 	return fmt.Sprintf("/api/v1/games/%d", game_id)
 }
 
+func deleteGamePath(gameId int32) string {
+	return fmt.Sprintf("/games/%d/delete", gameId)
+}
+
 func createGame(w http.ResponseWriter, req *http.Request) {
 	type Player struct {
 		Player_Id       int32
@@ -152,7 +156,10 @@ func deleteGame(w http.ResponseWriter, req *http.Request) {
 	if _, err := pool.Execute("deleteGame", int32(gameId)); err != nil {
 		fmt.Fprintf(os.Stderr, "deleteGame: %v\n", err)
 		http.Error(w, "Internal server error", http.StatusInternalServerError)
+		return
 	}
+
+	http.Redirect(w, req, "/games", http.StatusSeeOther)
 }
 
 func sortLink(label, column, defaultSortDir, sortCol, sortDir string) string {
