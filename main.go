@@ -11,6 +11,7 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"time"
 )
 
 var pool *pgx.ConnectionPool
@@ -115,6 +116,61 @@ type player struct {
 	name      string
 }
 
+type GamePlayer struct {
+	nulls          int64
+	GameId         int32
+	PlayerId       int32
+	Name           string
+	Level          int16
+	EffectiveLevel int16
+	Winner         bool
+}
+
+type Game struct {
+	nulls   int64
+	Players []GamePlayer
+	Date    time.Time
+	GameId  int32
+	Length  int16
+}
+
+func SelectAllGamesWithDetails() (games []Game, err error) {
+	gameIdToIndexMap := make(map[int32]int)
+	games = make([]Game, 0, 8)
+	err = pool.SelectFunc("select game_id, date, length from game", func(r *pgx.DataRowReader) error {
+		var g Game
+		g.Players = make([]GamePlayer, 0, 4)
+		g.GameId = r.ReadValue().(int32)
+		g.Date = r.ReadValue().(time.Time)
+		g.Length = r.ReadValue().(int16)
+		gameIdToIndexMap[g.GameId] = len(games)
+		games = append(games, g)
+		return nil
+	})
+	if err != nil {
+		return
+	}
+
+	err = pool.SelectFunc("select game_id, player_id, name, level, effective_level, winner from game_player join player using(player_id)", func(r *pgx.DataRowReader) error {
+		var gp GamePlayer
+		gp.GameId = r.ReadValue().(int32)
+		gp.PlayerId = r.ReadValue().(int32)
+		gp.Name = r.ReadValue().(string)
+		gp.Level = r.ReadValue().(int16)
+		gp.EffectiveLevel = r.ReadValue().(int16)
+		gp.Winner = r.ReadValue().(bool)
+
+		gameIdx := gameIdToIndexMap[gp.GameId]
+		games[gameIdx].Players = append(games[gameIdx].Players, gp)
+		return nil
+	})
+	if err != nil {
+		return
+	}
+
+	return
+}
+
 // afterConnect creates the prepared statements that this application uses
 func afterConnect(conn *pgx.Connection) (err error) {
 	err = conn.Prepare("getPlayers", `
@@ -186,6 +242,7 @@ func main() {
 	router.Get("/players", http.HandlerFunc(getPlayers))
 	router.Post("/players", http.HandlerFunc(createPlayer))
 	router.Post("players/:id/delete", http.HandlerFunc(deletePlayer))
+	router.Get("/games", http.HandlerFunc(getGames))
 	http.Handle("/", router)
 	http.Handle("/assets/", NoDirListing(http.StripPrefix("/assets/", http.FileServer(http.Dir(config.assetPath)))))
 

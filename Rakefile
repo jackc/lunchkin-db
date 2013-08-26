@@ -32,7 +32,13 @@ file 'standings.go' => 'standings.gst' do |t|
   end
 end
 
-file 'lunchkin-db' => ['handlers.go', 'main.go', 'migrations.go', 'players_index.go', 'header.go', 'footer.go', 'standings.go'] do |t|
+file 'games_index.go' => 'games_index.gst' do |t|
+  t.prerequisites.each do |source|
+    sh "gst #{source} | gofmt > #{t.name}"
+  end
+end
+
+file 'lunchkin-db' => ['handlers.go', 'main.go', 'migrations.go', 'players_index.go', 'header.go', 'footer.go', 'standings.go', 'games_index.go'] do |t|
   sh 'go build'
 end
 

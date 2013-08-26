@@ -70,10 +70,13 @@ func deletePlayer(w http.ResponseWriter, req *http.Request) {
 }
 
 func getGames(w http.ResponseWriter, req *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
-	if err := pool.SelectValueTo(w, "getGames"); err != nil {
+	games, err := SelectAllGamesWithDetails()
+	if err != nil {
 		http.Error(w, "Internal server error", http.StatusInternalServerError)
+		return
 	}
+
+	RenderGamesIndex(w, games)
 }
 
 func gamePath(game_id int32) string {
