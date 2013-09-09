@@ -6,7 +6,7 @@ escape: html
 <html>
 <head>
   <title>Lunchkin Scoreboard</title>
-  <link rel="stylesheet" href="assets/css/app.css"/>
+  <link rel="stylesheet" href="/assets/css/app.css"/>
 </head>
 <body>
   <ul class="menu">

@@ -171,6 +171,27 @@ func SelectAllGamesWithDetails() (games []Game, err error) {
 	return
 }
 
+type Player struct {
+	PlayerId int32
+	Name     string
+}
+
+func SelectAllPlayers() (players []Player, err error) {
+	players = make([]Player, 0, 8)
+	err = pool.SelectFunc("select player_id, name from player order by name", func(r *pgx.DataRowReader) error {
+		var p Player
+		p.PlayerId = r.ReadValue().(int32)
+		p.Name = r.ReadValue().(string)
+		players = append(players, p)
+		return nil
+	})
+	if err != nil {
+		return
+	}
+
+	return
+}
+
 // afterConnect creates the prepared statements that this application uses
 func afterConnect(conn *pgx.Connection) (err error) {
 	err = conn.Prepare("getPlayers", `
@@ -243,6 +264,8 @@ func main() {
 	router.Post("/players", http.HandlerFunc(createPlayer))
 	router.Post("players/:id/delete", http.HandlerFunc(deletePlayer))
 	router.Get("/games", http.HandlerFunc(getGames))
+	router.Get("/games/new", http.HandlerFunc(newGame))
+	router.Post("games", http.HandlerFunc(createGame))
 	router.Post("games/:id/delete", http.HandlerFunc(deleteGame))
 	http.Handle("/", router)
 	http.Handle("/assets/", NoDirListing(http.StripPrefix("/assets/", http.FileServer(http.Dir(config.assetPath)))))
