@@ -83,6 +83,73 @@ func gamePath(game_id int32) string {
 	return fmt.Sprintf("/api/v1/games/%d", game_id)
 }
 
+type DateField struct {
+	Raw    string
+	Errors []error
+	Value  time.Time
+}
+
+func (f *DateField) Parse(raw string) {
+	f.Raw = raw
+	f.Errors = make([]error, 0)
+
+	var err error
+	f.Value, err = time.Parse("2006-01-02", raw)
+	if err != nil {
+		f.Errors = append(f.Errors, err)
+	}
+}
+
+type Int16Field struct {
+	Raw    string
+	Errors []error
+	Value  int16
+}
+
+func (f *Int16Field) Parse(raw string) {
+	f.Raw = raw
+	f.Errors = make([]error, 0)
+
+	var err error
+	var i64 int64
+	i64, err = strconv.ParseInt(raw, 10, 16)
+	if err != nil {
+		f.Errors = append(f.Errors, err)
+	}
+	f.Value = int16(i64)
+}
+
+type Int32Field struct {
+	Raw    string
+	Errors []error
+	Value  int32
+}
+
+func (f *Int32Field) Parse(raw string) {
+	f.Raw = raw
+	f.Errors = make([]error, 0)
+
+	var err error
+	var i64 int64
+	i64, err = strconv.ParseInt(raw, 10, 32)
+	if err != nil {
+		f.Errors = append(f.Errors, err)
+	}
+	f.Value = int32(i64)
+}
+
+type GameFormPlayer struct {
+	PlayerId       Int32Field
+	Level          Int16Field
+	EffectiveLevel Int16Field
+	Winner         bool
+}
+type GameForm struct {
+	Date    DateField
+	Length  Int16Field
+	Players []GameFormPlayer
+}
+
 func newGame(w http.ResponseWriter, req *http.Request) {
 	players, err := SelectAllPlayers()
 	if err != nil {
@@ -98,20 +165,9 @@ func deleteGamePath(gameId int32) string {
 }
 
 func createGame(w http.ResponseWriter, req *http.Request) {
-	type Player struct {
-		PlayerId       int32
-		Level          int16
-		EffectiveLevel int16
-		Winner         bool
-	}
-	type Game struct {
-		Date    time.Time
-		Length  int16
-		Players []Player
-	}
 
 	var err error
-	var game Game
+	var game GameForm
 
 	err = req.ParseForm()
 	if err != nil {
@@ -120,49 +176,15 @@ func createGame(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	game.Date, err = time.Parse("2006-01-02", req.FormValue("Game.Date"))
-	if err != nil {
-		w.WriteHeader(422)
-		fmt.Fprintf(w, "Error decoding date: %v", err)
-		return
-	}
-
-	var gameLength64 int64
-	gameLength64, err = strconv.ParseInt(req.FormValue("Game.Length"), 10, 16)
-	if err != nil {
-		w.WriteHeader(422)
-		fmt.Fprintf(w, "Error decoding length: %v", err)
-		return
-	}
-	game.Length = int16(gameLength64)
+	game.Date.Parse(req.FormValue("Game.Date"))
+	game.Length.Parse(req.FormValue("Game.Length"))
 
 	playerIds := req.Form["Game.Players.Ids"]
-	game.Players = make([]Player, len(playerIds))
+	game.Players = make([]GameFormPlayer, len(playerIds))
 	for i, playerId := range playerIds {
-		var i64 int64
-		i64, err = strconv.ParseInt(playerId, 10, 32)
-		if err != nil {
-			w.WriteHeader(422)
-			fmt.Fprintf(w, "Error decoding player id: %v", err)
-			return
-		}
-		game.Players[i].PlayerId = int32(i64)
-
-		i64, err = strconv.ParseInt(req.FormValue("Game.Players."+playerId+".Level"), 10, 16)
-		if err != nil {
-			w.WriteHeader(422)
-			fmt.Fprintf(w, "Error decoding level: %v", err)
-			return
-		}
-		game.Players[i].Level = int16(i64)
-
-		i64, err = strconv.ParseInt(req.FormValue("Game.Players."+playerId+".EffectiveLevel"), 10, 16)
-		if err != nil {
-			w.WriteHeader(422)
-			fmt.Fprintf(w, "Error decoding effective level: %v", err)
-			return
-		}
-		game.Players[i].EffectiveLevel = int16(i64)
+		game.Players[i].PlayerId.Parse(playerId)
+		game.Players[i].Level.Parse(req.FormValue("Game.Players." + playerId + ".Level"))
+		game.Players[i].EffectiveLevel.Parse(req.FormValue("Game.Players." + playerId + ".EffectiveLevel"))
 
 		if req.FormValue("Game.Players."+playerId+".Winner") != "" {
 			game.Players[i].Winner = true
@@ -179,13 +201,13 @@ func createGame(w http.ResponseWriter, req *http.Request) {
 		    select game_id, player_id, level, effective_level, winner
 		    from g
 		      cross join (values`)
-	args = append(args, game.Date)
-	args = append(args, game.Length)
+	args = append(args, game.Date.Value)
+	args = append(args, game.Length.Value)
 	for i, p := range game.Players {
 		fmt.Fprintf(&sql, "($%d, $%d, $%d, $%d)", len(args)+1, len(args)+2, len(args)+3, len(args)+4)
-		args = append(args, p.PlayerId)
-		args = append(args, p.Level)
-		args = append(args, p.EffectiveLevel)
+		args = append(args, p.PlayerId.Value)
+		args = append(args, p.Level.Value)
+		args = append(args, p.EffectiveLevel.Value)
 		args = append(args, p.Winner)
 		if i < (len(game.Players) - 1) {
 			sql.WriteString(", ")
