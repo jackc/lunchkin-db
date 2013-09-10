@@ -34,10 +34,6 @@
 
     Game.prototype.idAttribute = 'game_id';
 
-    Game.prototype.initialize = function() {
-      debugger;
-    };
-
     return Game;
 
   })(Backbone.Model);

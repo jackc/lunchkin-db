@@ -9,9 +9,6 @@ class App.Models.Player extends Backbone.Model
 class App.Models.Game extends Backbone.Model
   idAttribute: 'game_id'
 
-  initialize: ->
-    debugger
-
 class App.Collections.Standings extends Backbone.Collection
   url: "api/v1/standings"
   sortAttribute: 'rating'

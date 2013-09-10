@@ -27,7 +27,7 @@
 
   <script id="playerTemplate" type="text/html">
     <li>
-      <div class="name"><%= name %> <%= player_id %></div>
+      <div class="name"><%= name %></div>
       <button>Delete</button>
     </li>
   </script>
@@ -54,6 +54,9 @@
 
   <script id="gameTemplate" type="text/html">
     <%= g.date %>
+    <% if(g.length != null) { %>
+      <span> - <%= g.length %> rounds</span>
+    <% } %>
   </script>
 
 
